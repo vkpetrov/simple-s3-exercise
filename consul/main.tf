@@ -54,6 +54,13 @@ resource "consul_keys" "ip_config" {
     value = ""
   }
 }
+
+resource "consul_keys" "apache" {
+  key {
+    path = "apache/configuration/"
+    value = ""
+  }
+}
 resource "consul_acl_policy" "buckets" {
   name  = "buckets"
   rules = <<-RULE
@@ -71,12 +78,4 @@ resource "consul_acl_policy" "buckets" {
 resource "consul_acl_token" "buckets" {
   description = "token for managins s3 buckets"
   policies    = [consul_acl_policy.buckets.name]
-}
-
-##################################################################################
-# OUTPUTS
-##################################################################################
-
-output "buckets_token_accessor_id" {
-  value = consul_acl_token.buckets.accessor_id
 }

@@ -25,8 +25,3 @@ variable "consul_datacenter" {
   description = "Local consul datacenter"
   default     = "dc1"
 }
-
-variable "access_ip" {
-  type = string
-  description = "Allow IP to access S3 object"
-}

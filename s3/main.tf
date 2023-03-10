@@ -44,6 +44,13 @@ data "consul_keys" "buckets" {
   }
 }
 
+data "consul_keys" "config" {
+  key {
+    name = "access_ip"
+    path = "config/access_ip"
+  }
+}
+
 
 ##################################################################################
 # RESOURCES
@@ -62,6 +69,7 @@ resource "random_integer" "rand" {
 
 locals {
   s3_bucket_name = "dev-bucket-${random_integer.rand.result}"
+  access_ip      = jsondecode(data.consul_keys.config.var.access_ip)["access_ip"]
   common_tags = {
     "Environment" : "Dev",
     "Project" : "S3_Bucket"

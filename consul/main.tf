@@ -48,6 +48,12 @@ resource "consul_keys" "buckets" {
   }
 }
 
+resource "consul_keys" "ip_config" {
+  key {
+    path = "config/"
+    value = ""
+  }
+}
 resource "consul_acl_policy" "buckets" {
   name  = "buckets"
   rules = <<-RULE

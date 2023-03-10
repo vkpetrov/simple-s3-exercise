@@ -23,7 +23,7 @@ resource "aws_s3_bucket_policy" "dev_bucket_policy" {
         ]
         Condition = {
           IpAddress : {
-            "aws:SourceIp" : ["${var.access_ip}"]
+            "aws:SourceIp" : ["${local.access_ip}"]
           }
         }
         Resource = [
@@ -43,9 +43,9 @@ resource "aws_s3_bucket_versioning" "bucket_versioning" {
 }
 
 resource "aws_s3_bucket_object" "welldone" {
-  bucket = aws_s3_bucket.dev_bucket.id
-  key    = "welldone.png"
-  source = "./welldone.png"
-  acl    = "authenticated-read"
+  bucket       = aws_s3_bucket.dev_bucket.id
+  key          = "welldone.png"
+  source       = "./welldone.png"
+  acl          = "authenticated-read"
   content_type = "image/png"
 }

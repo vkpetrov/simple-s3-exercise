@@ -42,8 +42,13 @@ data "consul_keys" "apache" {
     name = "common_tags"
     path = "apache/configuration/common_tags"
   }
+  key {
+    name = "net_info"
+    path = "apache/configuration/net_info"
+  }
 }
 
+data "aws_availability_zones" "available" {}
 
 ##################################################################################
 # RESOURCES
@@ -63,4 +68,6 @@ resource "random_integer" "rand" {
 locals {
   s3_bucket_name = "dev-state-bucket-${random_integer.rand.result}"
   common_tags    = jsondecode(data.consul_keys.apache.var.common_tags)
+  #cidr_block     = jsonencode(data.consul_keys.apache.var.net_info)["cidr_block"]
+  #subnet_count   = jsonencode(data.consul_keys.apache.var.net_info)["subnet_count"]
 }

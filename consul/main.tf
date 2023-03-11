@@ -76,6 +76,6 @@ resource "consul_acl_policy" "buckets" {
 }
 
 resource "consul_acl_token" "buckets" {
-  description = "token for managins s3 buckets"
+  description = "token for managing s3 buckets"
   policies    = [consul_acl_policy.buckets.name]
 }

@@ -14,9 +14,6 @@ resource "aws_iam_policy" "state_bucket_policy" {
   name        = "state_bucket_policy"
   path        = "/"
   description = "Policy for accessing state bucket"
-
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -64,4 +61,11 @@ resource "aws_s3_bucket_versioning" "bucket_versioning" {
   versioning_configuration {
     status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket" "config_bucket" {
+  bucket              = "apache-config-${random_integer.rand.result}"
+  object_lock_enabled = true
+  force_destroy       = true
+  tags                = local.common_tags
 }

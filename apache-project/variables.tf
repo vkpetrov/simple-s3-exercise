@@ -25,3 +25,9 @@ variable "consul_datacenter" {
   description = "Local consul datacenter"
   default     = "dc1"
 }
+
+variable "env" {
+  type        = string
+  description = "Working environment"
+  default     = "dev"
+}

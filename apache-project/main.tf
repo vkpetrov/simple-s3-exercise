@@ -48,6 +48,16 @@ data "consul_keys" "apache" {
   }
 }
 
+data "terraform_remote_state" "s3_remote_state" {
+  backend = "s3"
+  config = {
+    bucket  = "dev-state-bucket-88794"
+    key     = "dev-terraform.tfstate"
+    region  = "us-east-1"
+    profile = "deep-dive"
+  }
+}
+
 data "aws_availability_zones" "available" {}
 
 ##################################################################################

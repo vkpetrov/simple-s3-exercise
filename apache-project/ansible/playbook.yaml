@@ -1,0 +1,23 @@
+---
+- name: Download file from S3 to EC2 using s3_object module
+  hosts: localhost
+  gather_facts: false
+  vars:
+    s3_bucket_name: your_s3_bucket_name
+    s3_object_key: your_s3_object_key
+    local_path: /path/to/local/download
+    aws_access_key: your_aws_access_key
+    aws_secret_key: your_aws_secret_key
+  tasks:
+    - name: Install boto3 package
+      pip:
+        name: boto3
+      become: true
+
+    - name: Download file from S3 using s3_object module
+      amazon.aws.s3_object:
+        bucket: "{{ s3_bucket_name }}"
+        object: "{{ s3_object_key }}"
+        dest: "{{ local_path }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"

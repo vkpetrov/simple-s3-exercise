@@ -17,6 +17,23 @@ resource "aws_elb" "apache_elb" {
   tags = local.common_tags
 }
 
+
+resource "aws_launch_template" "apache_lt" {
+  block_device_mappings {
+    device_name = "/dev/sda1"
+    ebs {
+      volume_size = 20
+      volume_type = "gp2"
+      delete_on_termination = false
+    }
+  }
+  cpu_options {
+    core_count = 2
+    threads_per_core = 2
+  }
+  instance_type = "t3.micro"
+  image_id = "ami-0fec2c2e2017f4e7b"
+}
 resource "aws_launch_configuration" "apache_lc" {
   lifecycle {
     create_before_destroy = true

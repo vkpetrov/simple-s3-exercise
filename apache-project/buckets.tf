@@ -69,3 +69,15 @@ resource "aws_s3_bucket" "config_bucket" {
   force_destroy       = true
   tags                = local.common_tags
 }
+
+resource "aws_s3_bucket_object" "website_index" {
+  bucket = aws_s3_bucket.config_bucket
+  key    = "index.html"
+  source = "./index.html"
+}
+
+resource "aws_s3_bucket_object" "ansible_playbook" {
+  bucket = aws_s3_bucket.config_bucket
+  key = "playbook.yaml"
+  source = "./ansible/playbook.yaml"
+}

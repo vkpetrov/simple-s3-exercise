@@ -22,36 +22,28 @@ resource "aws_launch_template" "apache_lt" {
   block_device_mappings {
     device_name = "/dev/sda1"
     ebs {
-      volume_size = 20
-      volume_type = "gp2"
+      volume_size           = 20
+      volume_type           = "gp2"
       delete_on_termination = false
     }
   }
   cpu_options {
-    core_count = 2
+    core_count       = 2
     threads_per_core = 2
   }
   instance_type = "t3.micro"
-  image_id = "ami-0fec2c2e2017f4e7b"
+  image_id      = "ami-0fec2c2e2017f4e7b"
 }
-resource "aws_launch_configuration" "apache_lc" {
-  lifecycle {
-    create_before_destroy = true
-  }
-  name                        = "apache_lc-${var.env}"
-  name_prefix                 = "apache-lc-${var.env}"
-  associate_public_ip_address = false
-  instance_type               = "t3.micro"
-  image_id                    = "VALUE_TO_UPDATE"
-}
-
 resource "aws_autoscaling_group" "apache_asg" {
   lifecycle {
     create_before_destroy = false
   }
   vpc_zone_identifier  = data.terraform_remote_state.s3_remote_state.outputs.private_subnets
   name                 = "apache_asg-${var.env}"
-  launch_configuration = aws_launch_configuration.apache_lc.id
+  launch_template {
+    id = aws_launch_configuration.apache_lc.id
+    version = "$Latest"
+  }
   max_size             = 1
   min_size             = 1
   desired_capacity     = 1
@@ -64,5 +56,37 @@ resource "aws_autoscaling_group" "apache_asg" {
       value               = tag.value
       propagate_at_launch = true
     }
+  }
+}
+
+# Create a Scaling Policy for Scaling Out
+resource "aws_autoscaling_policy" "scale_out_policy" {
+  name                   = "scale-out-policy"
+  policy_type            = "SimpleScaling"
+  scaling_adjustment     = "1"
+  cooldown               = "60"
+  autoscaling_group_name = aws_autoscaling_group.apache_asg.name
+
+  # Scale Out Trigger
+  step_adjustment {
+    metric_interval_lower_bound = "0"
+    scaling_adjustment          = "1"
+    metric_interval_upper_bound = "80"
+  }
+}
+
+# Create a Scaling Policy for Scaling In
+resource "aws_autoscaling_policy" "scale_in_policy" {
+  name                   = "scale-in-policy"
+  policy_type            = "SimpleScaling"
+  scaling_adjustment     = "-1"
+  cooldown               = "60"
+  autoscaling_group_name = aws_autoscaling_group.apache_asg.name
+
+  # Scale In Trigger
+  step_adjustment {
+    metric_interval_lower_bound = "0"
+    scaling_adjustment          = "-1"
+    metric_interval_upper_bound = "20"
   }
 }

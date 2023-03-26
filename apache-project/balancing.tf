@@ -1,6 +1,6 @@
 resource "aws_elb" "apache_elb" {
   name    = "apache-elb-${var.env}"
-  subnets = data.terraform_remote_state.s3_remote_state.outputs.public_subnets
+  subnets = module.vpc.public_subnets
   listener {
     instance_port     = 80
     instance_protocol = "http"
@@ -28,27 +28,27 @@ resource "aws_launch_template" "apache_lt" {
     }
   }
   cpu_options {
-    core_count       = 2
+    core_count       = 1
     threads_per_core = 2
   }
   instance_type = "t3.micro"
   image_id      = "ami-0fec2c2e2017f4e7b"
 }
 resource "aws_autoscaling_group" "apache_asg" {
+  availability_zones = module.vpc.azs
   lifecycle {
     create_before_destroy = false
   }
-  vpc_zone_identifier  = data.terraform_remote_state.s3_remote_state.outputs.private_subnets
-  name                 = "apache_asg-${var.env}"
+  name                = "apache_asg-${var.env}"
   launch_template {
-    id = aws_launch_configuration.apache_lc.id
+    id      = aws_launch_template.apache_lt.id
     version = "$Latest"
   }
-  max_size             = 1
-  min_size             = 1
-  desired_capacity     = 1
-  force_delete         = true
-  load_balancers       = [aws_elb.apache_elb.name]
+  max_size         = 1
+  min_size         = 1
+  desired_capacity = 1
+  force_delete     = true
+  load_balancers   = [aws_elb.apache_elb.name]
   dynamic "tag" {
     for_each = local.common_tags
     content {
@@ -63,7 +63,6 @@ resource "aws_autoscaling_group" "apache_asg" {
 resource "aws_autoscaling_policy" "scale_out_policy" {
   name                   = "scale-out-policy"
   policy_type            = "SimpleScaling"
-  scaling_adjustment     = "1"
   cooldown               = "60"
   autoscaling_group_name = aws_autoscaling_group.apache_asg.name
 
@@ -79,7 +78,6 @@ resource "aws_autoscaling_policy" "scale_out_policy" {
 resource "aws_autoscaling_policy" "scale_in_policy" {
   name                   = "scale-in-policy"
   policy_type            = "SimpleScaling"
-  scaling_adjustment     = "-1"
   cooldown               = "60"
   autoscaling_group_name = aws_autoscaling_group.apache_asg.name
 
